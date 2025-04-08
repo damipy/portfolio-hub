@@ -9,18 +9,27 @@ services:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--user=root", "--password=somewordpress"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   wordpress:
     image: wordpress:latest
     ports:
-      - "8080:80"
+      - "8000:80"
     volumes:
       - ./greeting-block:/var/www/html/wp-content/plugins/greeting-block
       - ./portfolio-theme:/var/www/html/wp-content/themes/portfolio-theme
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db_data:
